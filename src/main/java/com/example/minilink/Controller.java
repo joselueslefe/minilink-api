@@ -1,28 +1,34 @@
 package com.example.minilink;
 
+import com.example.minilink.Link;
+import com.example.minilink.LinkRecode;
+import com.example.minilink.LinkRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
-import java.util.Map;
+
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
-
 public class Controller {
-    private Map<String, String> links = new HashMap<>();
+
+    @Autowired
+    private LinkRepository repository;
 
     @PostMapping("/encurtar")
-    public LinkRecode.LinkRecord encurtar (@RequestBody String urlrecebida){
+    public LinkRecode.LinkRecord encurtar(@RequestBody String urlrecebida) {
         String id = UUID.randomUUID().toString().substring(0, 6);
-
-                links.put(id, urlrecebida);
-
-                        return new LinkRecode.LinkRecord(id, urlrecebida);
+        Link novoLink = new Link(id, urlrecebida);
+        repository.save(novoLink); // Agora o erro de 'S' deve sumir
+        return new LinkRecode.LinkRecord(id, urlrecebida);
     }
 
     @GetMapping("/{id}")
     public String buscar(@PathVariable String id) {
-        return links.getOrDefault(id, "Link não encontrado!");
+        // Corrigido para findById e parênteses ajustados
+        return repository.findById(id).map(link -> {
+            repository.incrementarCliques(id);
+            return link.getUrlOriginal();
+        }).orElse("Link não encontrado!");
     }
-
 }
