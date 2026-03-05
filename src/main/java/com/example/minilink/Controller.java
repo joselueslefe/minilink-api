@@ -19,13 +19,14 @@ public class Controller {
     public LinkRecode.LinkRecord encurtar(@RequestBody String urlrecebida) {
         String id = UUID.randomUUID().toString().substring(0, 6);
         Link novoLink = new Link(id, urlrecebida);
-        repository.save(novoLink); // Agora o erro de 'S' deve sumir
+        repository.save(novoLink);
         return new LinkRecode.LinkRecord(id, urlrecebida);
     }
 
     @GetMapping("/{id}")
     public String buscar(@PathVariable String id) {
-        // Corrigido para findById e parênteses ajustados
+
+
         return repository.findById(id).map(link -> {
             repository.incrementarCliques(id);
             return link.getUrlOriginal();
